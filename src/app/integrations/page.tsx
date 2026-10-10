@@ -9,25 +9,30 @@ function State({ live, children }: { live: boolean; children: React.ReactNode })
   return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${live ? "border border-line text-good" : "bg-demo text-demo-ink"}`}>{children}</span>;
 }
 
+// Shape of Vaani's call_postprocessing webhook (docs.vaanivoice.ai/guides/webhook-setup).
+// The keys inside "entities" are whatever you configure under the agent's Analysis → extraction.
 const SAMPLE_PAYLOAD = `{
-  "event": "call.completed",
-  "call_id": "abc123",
-  "from": "+91 98xxxxxxxx",
-  "duration_sec": 284,
-  "transcript": "…",
-  "extracted_data": {
-    "caller_name": "Pooja",
-    "caller_type": "new_enquiry",        // or "existing_client"
-    "project_type": "2BHK full home",     // free text or our enum
-    "area_sqft": 900,
-    "location": "Magarpatta",
-    "timeline": "flexible, January start",
-    "deadline_weeks": null,               // number if there's a hard deadline
-    "budget": null,                        // only if volunteered
-    "decision_maker": "yes",
-    "pricing_asked": false,
-    "urgent_human_request": false,
-    "notes": "…"
+  "event": "call_postprocessing",
+  "call_id": "…",
+  "data": {
+    "call_duration": 284000,          // milliseconds
+    "summary": "…",                    // also scanned for complaints / urgency
+    "transcript": "[00:00:01] AGENT: …",
+    "dispositions": { "outcome": "…" },
+    "entities": {
+      "caller_name": "Pooja",
+      "caller_type": "new_enquiry",     // or "existing_client"
+      "project_type": "2BHK full home",
+      "area_sqft": "900",
+      "location": "Magarpatta",
+      "timeline": "flexible, January start",
+      "deadline_weeks": "",             // number if there's a hard deadline
+      "budget": "",                     // only if volunteered
+      "decision_maker": "yes",
+      "pricing_asked": "no",
+      "urgent_human_request": "no",
+      "phone_number": ""
+    }
   }
 }`;
 
@@ -82,14 +87,20 @@ export default async function IntegrationsPage() {
 
         <Card title="Vaani Voice (live calls)" action={<State live={s.vaani.live}>{s.vaani.live ? "Webhook enabled" : "Not connected"}</State>} className="lg:col-span-2">
           <p className="text-sm text-ink-2">{s.vaani.detail}</p>
-          <p className="mt-2 text-sm text-ink-2">
-            In Vaani, add a post-call webhook pointing to <code className="break-all rounded bg-surface-2 px-1">{webhookUrl}</code> (it must be a public HTTPS URL, so use the Vercel deployment). Authenticate with
-            either header <code className="break-all rounded bg-surface-2 px-1">x-webhook-secret: &lt;VAANI_WEBHOOK_SECRET&gt;</code>, a <code className="break-all rounded bg-surface-2 px-1">?secret=</code> query param, or an HMAC-SHA256 signature
-            header of the raw body. Ask the agent to collect the fields below as post-call extracted data. The mapper also accepts common alternative names and nesting.
-          </p>
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ink-2">
+            <li>
+              In <strong>app.vaanivoice.ai → Settings → Webhooks</strong>, add <code className="break-all rounded bg-surface-2 px-1">{webhookUrl}?secret=&lt;VAANI_WEBHOOK_SECRET&gt;</code>. Vaani documents no
+              signature header, so the secret goes in the URL.
+            </li>
+            <li>
+              In your agent&apos;s <strong>Analysis</strong> settings, add extraction fields named like the <code>entities</code> keys below. The mapper also accepts free text and common alternative names.
+            </li>
+            <li>Make a test call with the agent. Only the <code>call_postprocessing</code> event creates a record; Vaani&apos;s other lifecycle events are acknowledged and ignored.</li>
+          </ol>
           <pre className="mt-3 overflow-auto rounded-lg bg-surface-2 p-3 text-xs">{SAMPLE_PAYLOAD}</pre>
           <p className="mt-2 text-xs text-muted">
-            Not yet verified against a live Vaani payload. Calls arriving here are stored as “Real call (Vaani)”; payloads with <code>&quot;test&quot;: true</code> or a test event are stored as simulated.
+            Built from Vaani&apos;s documented payload; not yet confirmed with a live call. Calls arriving here get the “Vaani voice call” badge. With no phone number attached (e.g. a browser test call), the record says so
+            and never claims a phone call.
           </p>
         </Card>
 

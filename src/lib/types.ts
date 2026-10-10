@@ -1,6 +1,6 @@
 // Shared domain types for call records and qualification.
 
-/** Where a record came from. Only `vaani` represents a real phone call. */
+/** Where a record came from. Only `vaani` is a live AI voice conversation (phone, or a browser test call when no number is attached). */
 export type CallSource = "demo_seed" | "simulated" | "vaani";
 
 export type CallerType = "new_enquiry" | "existing_client";

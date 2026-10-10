@@ -5,7 +5,7 @@ export type RangeKey = "7d" | "30d" | "90d" | "all";
 export type SourceFilter = CallSource | "all";
 
 export const RANGE_LABELS: Record<RangeKey, string> = { "7d": "Last 7 days", "30d": "Last 30 days", "90d": "Last 90 days", all: "All time" };
-export const SOURCE_LABELS: Record<SourceFilter, string> = { all: "All sources", vaani: "Real calls (Vaani)", simulated: "Simulated calls", demo_seed: "Demo seed (case transcripts)" };
+export const SOURCE_LABELS: Record<SourceFilter, string> = { all: "All sources", vaani: "Vaani voice calls", simulated: "Simulated calls", demo_seed: "Demo seed (case transcripts)" };
 export const OUTCOME_LABELS: Record<Outcome, string> = {
   qualified: "Qualified",
   unqualified: "Unqualified",

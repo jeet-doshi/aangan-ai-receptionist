@@ -25,7 +25,7 @@ export function buildHandoffMessage(rec: CallRecord): string {
   const heading = rec.escalation_required ? "🔴 URGENT ESCALATION" : OUTCOME_HEADINGS[rec.outcome] ?? rec.outcome;
   const sourceLine =
     rec.source === "vaani"
-      ? "Source: Vaani Voice phone call"
+      ? `Source: Vaani AI voice call${rec.caller_phone ? "" : " (no phone number received; e.g. a browser test call)"}`
       : rec.source === "simulated"
         ? "⚠️ SIMULATED DEMO CALL (not a real phone call)"
         : "⚠️ DEMO SEED DATA (not a real phone call)";

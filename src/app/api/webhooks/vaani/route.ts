@@ -4,8 +4,9 @@ import { config } from "@/lib/config";
 import { normaliseVaaniPayload, verifyVaaniRequest } from "@/lib/vaani";
 
 /**
- * Post-call webhook for the Vaani Voice agent. Records are stored with source = "vaani"
- * (a real phone call), except payloads that identify themselves as tests.
+ * Post-call webhook for the Vaani Voice agent (Settings → Webhooks in app.vaanivoice.ai).
+ * Records are stored with source = "vaani" (a live AI voice conversation), except payloads that identify themselves as tests.
+ * Vaani documents no signature, so authenticate with ?secret=<VAANI_WEBHOOK_SECRET> in the webhook URL.
  */
 export async function POST(req: Request) {
   if (!config.vaani.enabled) {
@@ -22,8 +23,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Body must be JSON" }, { status: 400 });
   }
   const event = String(body.event ?? body.type ?? req.headers.get("x-vaaniyantra-event") ?? "");
-  if (/failed|busy|no[_-]?answer/i.test(event)) {
-    return NextResponse.json({ ok: true, ignored: `event ${event} (call did not connect)` });
+  // Vaani sends ~11 lifecycle events per call (call_started, call_ended, …). Only the post-call
+  // analysis event carries the summary, entities and transcript, so it is the only one recorded.
+  const RECORDED_EVENTS = ["", "call_postprocessing", "call.completed"];
+  if (!RECORDED_EVENTS.includes(event) && !/test/i.test(event)) {
+    return NextResponse.json({ ok: true, ignored: `event ${event} (only call_postprocessing is recorded)` });
   }
   const isTest = body.test === true || /test/i.test(event);
   const call = normaliseVaaniPayload(body);

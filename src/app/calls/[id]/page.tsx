@@ -62,6 +62,12 @@ export default async function CallDetail({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
+      {c.source === "vaani" && (
+        <div className="rounded-lg border border-line px-4 py-2.5 text-sm text-ink-2">
+          Live AI voice conversation handled by the Vaani agent.{" "}
+          {c.caller_phone ? `Caller number: ${c.caller_phone}.` : "No phone number was received, so this was likely a browser (WebRTC) test call, not a phone call."}
+        </div>
+      )}
       {c.source !== "vaani" && (
         <div className="rounded-lg bg-demo px-4 py-2.5 text-sm text-demo-ink">
           {c.source === "demo_seed"

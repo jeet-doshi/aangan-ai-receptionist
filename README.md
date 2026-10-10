@@ -8,7 +8,7 @@ Every phone enquiry is answered, qualified against Nikhil's own rubric (`qualifi
 > **What's real and what's demo.** Every record has a source badge.
 > **Demo seed**: the 19 Sep 2026 phone transcripts from the case, replayed through the AI rules (originally handled by the human front desk).
 > **Simulated**: calls you create in the app.
-> **Real call (Vaani)**: only calls delivered by the Vaani webhook.
+> **Vaani voice call**: only live AI conversations delivered by the Vaani webhook (labelled as a browser test call when no phone number is attached).
 > A handoff is shown as **Sent** only when Telegram's API confirms delivery.
 
 ## Quick start
@@ -80,13 +80,17 @@ Existing records can be re-sent from their detail page (**Retry Telegram handoff
 **Why Telegram over email:** designers are on their phones on site. A Telegram group gives instant push, is shared by the whole team (no lead sits in one person's inbox), the bot is free, and setup takes 5 minutes. Email suits a formal record, but it's slower to notice, which defeats the "answered within the hour converts 4×" insight.
 
 ### Vaani Voice (live calls)
-The post-call webhook is at `POST /api/webhooks/vaani`. It needs a public HTTPS URL, so use the Vercel deployment.
-- Set `VAANI_WEBHOOK_SECRET` to a long random string.
-- Authenticate with header `x-webhook-secret: <secret>`, `Authorization: Bearer <secret>`, `?secret=<secret>`, **or** an HMAC-SHA256 signature of the raw body in `X-VaaniYantra-Signature` / `x-signature` (`sha256=<hex>`).
-- Have the agent collect these fields (top level or nested under `data` / `extracted_data` / `analysis` / `variables`): `caller_name, caller_type, project_type, area_sqft, location, timeline, deadline_weeks, budget, decision_maker, pricing_asked, urgent_human_request, notes`, plus `duration_sec`, `transcript`, and optionally `cost`. Free-text values are mapped (e.g. "2BHK full home" → residential full).
-- `call.failed` / busy / no-answer events are ignored. Payloads with `"test": true` are stored as simulated.
+Vaani ([docs](https://docs.vaanivoice.ai/guides/webhook-setup)) posts webhooks for every call lifecycle event. Only `call_postprocessing` is recorded, because it carries the summary, transcript, `entities` and `dispositions`. All other events get a 200 and are ignored.
 
-**Status:** the endpoint, auth and mapping are covered by tests and were exercised locally over HTTP. It has **not** been verified against a live Vaani payload, because Vaani's exact schema wasn't available. No phone number was purchased and no paid telephony was enabled.
+1. In **app.vaanivoice.ai → Settings → Webhooks**, add:
+   `https://aangan-ai-receptionist-ten.vercel.app/api/webhooks/vaani?secret=<VAANI_WEBHOOK_SECRET>`
+   Vaani documents no signature header, so the secret goes in the URL. The endpoint also accepts `x-webhook-secret`, `Authorization: Bearer`, or an HMAC-SHA256 signature.
+2. In the agent's **Analysis** settings, add entity extraction fields: `caller_name, caller_type, project_type, area_sqft, location, timeline, deadline_weeks, budget, decision_maker, pricing_asked, urgent_human_request, phone_number`. Free-text values are mapped (e.g. "2BHK full home" → residential full). The summary and dispositions are also scanned for complaints and urgency.
+3. Make a test call. The record appears with the **Vaani voice call** badge.
+
+Notes: `call_duration` in `call_postprocessing` is in milliseconds and is converted. The payload carries no phone number unless you extract one, so records without a number are labelled as a likely browser (WebRTC) test call, never a phone call.
+
+**Status:** built against Vaani's documented payload and covered by tests; not yet confirmed with a live Vaani call. No phone number was purchased and no paid telephony was enabled.
 
 ### Cost model
 Costs come from provider-reported figures when the webhook sends them. Otherwise they're estimated from `VOICE_COST_PER_MIN_INR` (default ₹4, a placeholder) and `AI_COST_PER_CALL_INR` (default ₹1, a placeholder). Set your real Vaani rates. The dashboard labels estimated costs.

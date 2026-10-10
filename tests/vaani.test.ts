@@ -48,3 +48,37 @@ test("webhook auth: shared secret or HMAC signature, otherwise rejected", () => 
   assert.equal(verifyVaaniRequest("s3cret", body, new Headers(), url), false);
   assert.equal(verifyVaaniRequest("", body, new Headers({ "x-webhook-secret": "" }), url), false);
 });
+
+test("Vaani call_postprocessing payload (documented shape): ms duration, entities, dispositions", () => {
+  const { input, transcript, externalId } = normaliseVaaniPayload({
+    event: "call_postprocessing",
+    call_id: "outbound-123",
+    timestamp: "2026-10-10T10:00:00Z",
+    data: {
+      room_name: "outbound-123",
+      call_id: "outbound-123",
+      call_duration: 55150.0,
+      end_reason: "Call ended",
+      summary: "Caller wants a full redesign of a 2BHK in Wakad.",
+      entities: { caller_name: "Ritu", project_type: "2BHK full home", area_sqft: "1,050 sq ft", location: "Wakad", timeline: "flexible", decision_maker: "yes" },
+      dispositions: { outcome: "interested" },
+      transcript: "[00:00:01] AGENT: Hello\n\n[00:00:03] USER: Hi",
+    },
+  });
+  assert.equal(input.duration_sec, 55);
+  assert.equal(input.caller_name, "Ritu");
+  assert.equal(input.area_sqft, 1050);
+  assert.equal(input.project_type, "residential_full");
+  assert.ok(input.notes?.includes("Disposition: interested"));
+  assert.ok(transcript?.includes("AGENT"));
+  assert.equal(externalId, "outbound-123");
+  assert.equal(qualify(input).outcome, "qualified");
+});
+
+test("complaint disposition or summary from Vaani escalates", () => {
+  const { input } = normaliseVaaniPayload({
+    event: "call_postprocessing",
+    data: { summary: "Existing client says her designer hasn't replied in a week.", entities: { caller_type: "existing_client" }, dispositions: { outcome: "complaint" } },
+  });
+  assert.equal(qualify(input).escalation_required, true);
+});

@@ -40,8 +40,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
       {nonReal > 0 && (
         <div className="rounded-lg bg-demo px-4 py-2.5 text-sm text-demo-ink">
-          <strong>Demo data:</strong> {nonReal} of {m.total} records shown are demo or simulated calls, <strong>not real phone calls</strong>. The demo seed replays the Sep 2026 case transcripts through the AI rules.
-          Use the Source filter to isolate real Vaani calls.
+          <strong>Demo data:</strong> {nonReal} of {m.total} records shown are demo or simulated calls, <strong>not real calls</strong>. The demo seed replays the Sep 2026 case transcripts through the AI rules.
+          Use the Source filter to isolate live Vaani voice calls.
         </div>
       )}
 

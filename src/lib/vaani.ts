@@ -9,7 +9,7 @@ type Json = Record<string, unknown>;
 
 function flatten(body: Json): Json {
   const out: Json = {};
-  const nestedKeys = ["data", "call", "extracted_data", "collected_data", "analysis", "variables", "custom_data", "post_call_analysis"];
+  const nestedKeys = ["data", "entities", "call", "extracted_data", "collected_data", "analysis", "variables", "custom_data", "post_call_analysis"];
   for (const k of nestedKeys) {
     const v = body[k];
     if (v && typeof v === "object" && !Array.isArray(v)) Object.assign(out, flatten(v as Json));
@@ -24,7 +24,8 @@ function pick(f: Json, ...keys: string[]): unknown {
 }
 const str = (v: unknown) => (v == null ? null : typeof v === "string" ? v : JSON.stringify(v));
 const numOrNull = (v: unknown) => {
-  const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
+  // Handles numbers and strings like "1,200 sq ft" or "8 weeks".
+  const n = typeof v === "number" ? v : parseFloat(String(v ?? "").replace(/,/g, "").match(/-?\d+(\.\d+)?/)?.[0] ?? "");
   return Number.isFinite(n) ? n : null;
 };
 const truthy = (v: unknown) => v === true || /^(true|yes|y|1)$/i.test(String(v ?? ""));
@@ -83,7 +84,13 @@ export interface NormalisedVaaniCall {
 export function normaliseVaaniPayload(body: Json): NormalisedVaaniCall {
   const f = flatten(body);
   const callerType = String(pick(f, "caller_type", "customer_type") ?? "").toLowerCase();
-  const durationRaw = numOrNull(pick(f, "duration_sec", "duration_seconds", "call_duration", "duration"));
+  // Vaani's call_postprocessing event reports call_duration in MILLISECONDS (call_ended uses seconds).
+  const isPostprocessing = body.event === "call_postprocessing";
+  const vaaniMs = isPostprocessing ? numOrNull(f.call_duration) : null;
+  const durationRaw = vaaniMs != null ? Math.round(vaaniMs / 1000) : numOrNull(pick(f, "duration_sec", "duration_seconds", "call_duration", "duration"));
+  // Dispositions (e.g. {"outcome": "existing client complaint"}) are appended to notes so escalation keywords are seen.
+  const dispositions = body.data && typeof body.data === "object" ? (body.data as Json).dispositions : undefined;
+  const dispositionText = dispositions && typeof dispositions === "object" ? Object.values(dispositions as Json).map(String).join("; ") : "";
   const durationMs = numOrNull(pick(f, "duration_ms"));
   const voiceCost = numOrNull(pick(f, "voice_cost_inr", "call_cost", "cost_inr", "cost"));
   const aiCost = numOrNull(pick(f, "ai_cost_inr", "llm_cost"));
@@ -91,7 +98,7 @@ export function normaliseVaaniPayload(body: Json): NormalisedVaaniCall {
   return {
     input: {
       caller_name: str(pick(f, "caller_name", "name", "customer_name")),
-      caller_phone: str(pick(f, "caller_phone", "phone", "from", "from_number", "caller_number", "customer_number")),
+      caller_phone: str(pick(f, "caller_phone", "phone", "phone_number", "contact_number", "from", "from_number", "caller_number", "customer_number")),
       caller_type: /existing|client/.test(callerType) || truthy(pick(f, "is_existing_client")) ? "existing_client" : "new_enquiry",
       project_type: mapProjectType(pick(f, "project_type", "project", "requirement")),
       area_sqft: numOrNull(pick(f, "area_sqft", "carpet_area", "area", "sqft")),
@@ -101,7 +108,7 @@ export function normaliseVaaniPayload(body: Json): NormalisedVaaniCall {
       decision_maker: mapDecision(pick(f, "decision_maker", "is_decision_maker", "authority")),
       pricing_asked: truthy(pick(f, "pricing_asked", "asked_pricing")),
       urgent_human_request: truthy(pick(f, "urgent_human_request", "escalate", "needs_human", "urgent")),
-      notes: str(pick(f, "notes", "summary", "call_summary", "complaint")),
+      notes: [str(pick(f, "notes", "complaint")), str(pick(f, "summary", "call_summary")), dispositionText ? `Disposition: ${dispositionText}` : null].filter(Boolean).join("\n") || null,
       duration_sec: durationRaw ?? (durationMs != null ? Math.round(durationMs / 1000) : null),
     },
     transcript: str(transcriptRaw),
