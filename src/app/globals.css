@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* Design tokens. Chart colours come from the validated dataviz reference palette. */
+:root {
+  color-scheme: light;
+  --page: #f6f5f2;
+  --surface: #fcfcfb;
+  --surface-2: #f0efec;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #7a7873;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --brand: #8a4b2a; /* terracotta: Aangan = courtyard */
+  --brand-ink: #ffffff;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --seq-250: #86b6ef;
+  --seq-600: #184f95;
+  --good: #0ca30c;
+  --good-text: #006300;
+  --warning: #fab219;
+  --critical: #d03b3b;
+  --critical-text: #b42323;
+  --demo-bg: #fff4d6;
+  --demo-ink: #6b4a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #242422;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #8f8d86;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --brand: #d08a62;
+    --brand-ink: #1a1a19;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --seq-250: #3987e5;
+    --seq-600: #184f95;
+    --good-text: #0ca30c;
+    --critical-text: #ef6b6b;
+    --demo-bg: #3a2e10;
+    --demo-ink: #ffd98a;
+  }
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-grid: var(--grid);
+  --color-line: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-good: var(--good-text);
+  --color-critical: var(--critical-text);
+  --color-demo: var(--demo-bg);
+  --color-demo-ink: var(--demo-ink);
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
