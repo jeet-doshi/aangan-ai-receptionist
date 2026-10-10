@@ -16,3 +16,6 @@ next-env.d.ts
 npm-debug.log*
 .DS_Store
 /.claude/
+
+# Mesa case PDFs: course material, kept locally only
+*.pdf
