@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Components Map: Aangan AI Receptionist</title>
+<style>
+  :root {
+    --ink: #1a1714; --ink-2: #57524c; --muted: #8a847c; --line: #e4ded5; --page: #faf8f4; --card: #ffffff;
+    --brand: #8a4b2a; --brand-soft: #f6ece5; --blue: #2a78d6; --blue-soft: #eaf2fc;
+    --green: #127a3e; --green-soft: #e8f5ed; --red: #b42323; --red-soft: #fbeaea; --amber-soft: #fff4d6; --amber: #6b4a00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1800px; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, sans-serif; padding: 44px 48px 40px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 26px; }
+  h1 { font-size: 34px; letter-spacing: -0.5px; }
+  h1 span { color: var(--brand); }
+  .sub { color: var(--ink-2); font-size: 16px; margin-top: 6px; }
+  .meta { text-align: right; color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .meta b { color: var(--ink-2); font-weight: 600; }
+
+  .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 34px; position: relative; }
+  .stage { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 16px; position: relative; display: flex; flex-direction: column; }
+  .stage:not(:last-child)::after {
+    content: ""; position: absolute; right: -27px; top: 34px; width: 0; height: 0;
+    border-top: 11px solid transparent; border-bottom: 11px solid transparent; border-left: 16px solid var(--brand);
+  }
+  .step { font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: var(--brand); text-transform: uppercase; }
+  .stage h2 { font-size: 22px; margin: 2px 0 2px; }
+  .q { font-size: 13px; color: var(--muted); font-style: italic; margin-bottom: 14px; min-height: 34px; }
+  .box { border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 13.5px; line-height: 1.45; }
+  .box b { display: block; font-size: 14px; margin-bottom: 3px; }
+  .box ul { padding-left: 16px; color: var(--ink-2); }
+  .box li { margin: 1px 0; }
+  .plain { background: #f4f1ec; }
+  .live { background: var(--green-soft); }
+  .live b { color: var(--green); }
+  .demo { background: var(--amber-soft); }
+  .demo b { color: var(--amber); }
+  .ai { background: var(--blue-soft); }
+  .ai b { color: var(--blue); }
+  .rules { background: var(--brand-soft); }
+  .rules b { color: var(--brand); }
+  .urgent { background: var(--red-soft); }
+  .urgent b { color: var(--red); }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .6px; padding: 1px 6px; border-radius: 99px; margin-left: 4px; vertical-align: 1px; }
+  .t-live { background: var(--green); color: #fff; }
+  .t-demo { background: #e9b949; color: #3a2a00; }
+  .t-free { background: var(--brand); color: #fff; }
+
+  .bottom { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; gap: 18px; margin-top: 26px; }
+  .panel { border-radius: 14px; padding: 16px 18px; font-size: 13.5px; line-height: 1.5; border: 1px solid var(--line); background: var(--card); }
+  .panel h3 { font-size: 15px; margin-bottom: 6px; }
+  .panel ul { padding-left: 16px; color: var(--ink-2); }
+  .cut { border: 2px solid var(--red); background: var(--red-soft); }
+  .cut h3 { color: var(--red); }
+  .flag { border: 2px dashed #c9a227; background: var(--amber-soft); }
+  .flag h3 { color: var(--amber); }
+  footer { margin-top: 18px; display: flex; justify-content: space-between; color: var(--muted); font-size: 12.5px; }
+  .legend span { margin-left: 14px; }
+  .sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Components Map: <span>Aangan Studio AI Receptionist</span></h1>
+      <p class="sub">Every phone enquiry answered within minutes, day or night; qualified against Nikhil's rubric; the worthwhile ones reach a designer with everything already asked.</p>
+    </div>
+    <div class="meta"><b>Mesa School of Business · Case 03</b><br>Jeet Doshi · Oct 2026<br>Live: aangan-ai-receptionist-ten.vercel.app</div>
+  </header>
+
+  <section class="flow">
+    <!-- 1 TRIGGER -->
+    <div class="stage">
+      <div class="step">1 · Trigger</div>
+      <h2>A call comes in</h2>
+      <p class="q">What starts the workflow?</p>
+      <div class="box live"><b>Inbound enquiry call <span class="tag t-live">LIVE</span></b>
+        <ul><li>Answered by the Vaani Voice AI agent, 24×7, including the ~33% that arrive outside 10am–7pm</li><li>Tested via Vaani web call (no phone number bought)</li></ul></div>
+      <div class="box demo"><b>Simulated call <span class="tag t-demo">DEMO</span></b>
+        <ul><li>In-app form with one-click scenarios</li><li>Always labelled; never shown as a real call</li></ul></div>
+      <div class="box plain"><b>Scope</b>
+        <ul><li>Phone channel only</li><li>WhatsApp + web form: same pipeline later</li></ul></div>
+    </div>
+
+    <!-- 2 INPUT -->
+    <div class="stage">
+      <div class="step">2 · Input</div>
+      <h2>What we capture</h2>
+      <p class="q">What data does the system receive?</p>
+      <div class="box plain"><b>From the caller</b>
+        <ul><li>Name, phone, new vs existing client</li><li>Project type + carpet area</li><li>Site location</li><li>Timeline / deadline</li><li>Budget, only if volunteered</li><li>Decision-maker status</li><li>Pricing question? Complaint / urgency?</li></ul></div>
+      <div class="box live"><b>Vaani webhook <span class="tag t-live">LIVE</span></b>
+        <ul><li>call_postprocessing event: summary, transcript, extracted entities, dispositions, duration</li><li>Secret-authenticated</li></ul></div>
+    </div>
+
+    <!-- 3 CONTEXT -->
+    <div class="stage">
+      <div class="step">3 · Context</div>
+      <h2>What it knows</h2>
+      <p class="q">What rules and knowledge guide it?</p>
+      <div class="box rules"><b>qualified.md</b>
+        <ul><li>Nikhil's 5 criteria: real project, Pune/PCMC, realistic timeline, budget band, decision-maker</li></ul></div>
+      <div class="box rules"><b>services.md</b>
+        <ul><li>Residential + offices/clinics/studios ≤ ~3,000 sq ft</li><li>Exclusions: structural, decor-only, furniture, restaurants, hotels, retail, gyms</li><li>Design 3–4 wk · execution 8–16 wk</li></ul></div>
+      <div class="box rules"><b>pricing.md</b>
+        <ul><li>One approved pricing line; no number, ever</li></ul></div>
+      <div class="box plain"><b>40 Sep enquiry transcripts</b>
+        <ul><li>20 phone calls → demo seed + test set</li></ul></div>
+    </div>
+
+    <!-- 4 PROCESSING -->
+    <div class="stage">
+      <div class="step">4 · Processing</div>
+      <h2>Prepare the data</h2>
+      <p class="q">How is raw input made usable?</p>
+      <div class="box plain"><b>Webhook handling</b>
+        <ul><li>Verify secret</li><li>Record only call_postprocessing; ignore the ~10 lifecycle events</li><li>Duration ms → s</li></ul></div>
+      <div class="box plain"><b>Normalise fields</b>
+        <ul><li>Free text → categories ("3 BHK" → full home)</li><li>Fix speech-to-text slips ("Banner" → Baner)</li></ul></div>
+      <div class="box plain"><b>Fill gaps from summary</b>
+        <ul><li>Location, timeline, owner, area inferred from the caller's own words</li><li>Every inferred field flagged "verify"</li></ul></div>
+    </div>
+
+    <!-- 5 AI -->
+    <div class="stage">
+      <div class="step">5 · AI + decision</div>
+      <h2>Think &amp; decide</h2>
+      <p class="q">Where does judgement happen?</p>
+      <div class="box ai"><b>Vaani LLM voice agent</b>
+        <ul><li>Converses, asks one direct follow-up, summarises, extracts entities</li></ul></div>
+      <div class="box rules"><b>Rules engine <span class="tag t-free">₹0 / CALL</span></b>
+        <ul><li><b style="display:inline;font-size:13px">①</b> Escalation check first: existing-client complaint, unresponsive designer, urgent request</li><li><b style="display:inline;font-size:13px">②</b> 5 criteria: pass / fail / unclear</li><li><b style="display:inline;font-size:13px">③</b> Unclear 1–3 → one question; 1 fail → specific decline; 2+ → graceful decline</li><li><b style="display:inline;font-size:13px">④</b> Pricing guard on every reply</li></ul></div>
+    </div>
+
+    <!-- 6 OUTPUT -->
+    <div class="stage">
+      <div class="step">6 · Output</div>
+      <h2>Who gets what</h2>
+      <p class="q">What happens as a result?</p>
+      <div class="box plain"><b>Caller</b>
+        <ul><li>Approved reply, timelines explained, never a price</li></ul></div>
+      <div class="box live"><b>Designer: Telegram <span class="tag t-live">LIVE</span></b>
+        <ul><li>🟢 Qualified lead: full handoff note</li><li>Marked "sent" only when Telegram confirms</li></ul></div>
+      <div class="box urgent"><b>🔴 Urgent escalation</b>
+        <ul><li>Existing-client complaints → senior team instantly; never an "unqualified lead"</li></ul></div>
+      <div class="box live"><b>Nikhil: dashboard <span class="tag t-live">LIVE</span></b>
+        <ul><li>Supabase call records</li><li>Funnel, outcomes, decline reasons</li><li>Cost per call &amp; per qualified lead</li></ul></div>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <div class="panel cut">
+      <h3>✂ The Cut: no price quoting</h3>
+      <p>Nikhil asked the system to "quote our standard per-square-foot pricing". pricing.md says no number may ever be quoted, so this was <b>deliberately not built</b>. Every reply passes a pricing guard; pricing questions get only the approved line, and are not disqualifying.</p>
+    </div>
+    <div class="panel flag">
+      <h3>⚑ Flagged for Nikhil: timeline rules conflict</h3>
+      <p>services.md: ≥ 6 weeks. qualified.md / T07: 8–10 weeks. Design + execution: ≥ 11 weeks. <b>&lt; 6 wk declined</b>; <b>6–10 wk sent to human review</b>, not silently decided.</p>
+    </div>
+    <div class="panel">
+      <h3>Why Telegram, not email</h3>
+      <ul><li>Designers are on site, on phones: instant push</li><li>One group chat: no lead stuck in one inbox</li><li>Free bot, 5-minute setup</li><li>Speed is the point: &lt; 1 hr reply converts 4×</li></ul>
+    </div>
+    <div class="panel">
+      <h3>Honesty guardrails</h3>
+      <ul><li>Demo / simulated / live calls always badged</li><li>"Sent" only on confirmed delivery</li><li>Costs labelled as estimates until real rates are set</li><li>Inferred fields marked for the designer to verify</li></ul>
+    </div>
+  </section>
+
+  <footer>
+    <div>Stack: Next.js + TypeScript on Vercel · Supabase · Telegram Bot API · Vaani Voice · github.com/jeet-doshi/aangan-ai-receptionist</div>
+    <div class="legend"><span><i class="sw" style="background:var(--green-soft);border:1px solid var(--green)"></i>Live &amp; tested</span><span><i class="sw" style="background:var(--amber-soft);border:1px solid #c9a227"></i>Demo</span><span><i class="sw" style="background:var(--brand-soft);border:1px solid var(--brand)"></i>Studio rules</span><span><i class="sw" style="background:var(--blue-soft);border:1px solid var(--blue)"></i>LLM</span></div>
+  </footer>
+</body>
+</html>
