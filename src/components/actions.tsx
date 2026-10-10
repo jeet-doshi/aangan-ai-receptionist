@@ -69,32 +69,3 @@ export function RetryHandoffButton({ id }: { id: string }) {
     </div>
   );
 }
-
-export function SyncCrmButton({ id, label = "Sync to HubSpot" }: { id: string; label?: string }) {
-  const { busy, msg, run } = useAction();
-  return (
-    <div>
-      <button
-        className={btn}
-        disabled={busy}
-        onClick={() => run(`/api/calls/${id}/crm`, (b) => (b.crm_status === "synced" ? "Saved in HubSpot: HubSpot confirmed it." : { ok: false, text: `Not synced: ${String(b.crm_detail)}` }))}
-      >
-        {busy ? "Syncing…" : label}
-      </button>
-      <Msg msg={msg} />
-    </div>
-  );
-}
-
-export function HubSpotTestButton({ enabled }: { enabled: boolean }) {
-  const { busy, msg, run } = useAction();
-  return (
-    <div>
-      <button className={btn} disabled={busy || !enabled} onClick={() => run("/api/integrations/hubspot-test", (b) => `Connected to HubSpot account ${String(b.portalId)}. Nothing was created.`)}>
-        {busy ? "Checking…" : "Test HubSpot connection"}
-      </button>
-      {!enabled && <p className="mt-2 text-xs text-muted">Disabled until HUBSPOT_ACCESS_TOKEN is set.</p>}
-      <Msg msg={msg} />
-    </div>
-  );
-}

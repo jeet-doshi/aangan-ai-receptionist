@@ -3,7 +3,6 @@ import "server-only";
 import { z } from "zod";
 import { estimateCosts } from "./config";
 import { needsHandoff, performHandoff } from "./handoff";
-import { needsCrmSync, syncToHubSpot, type CrmResult } from "./hubspot";
 import { qualify } from "./qualify";
 import { getStore } from "./store";
 import type { CallInput, CallRecord, CallSource } from "./types";
@@ -68,26 +67,7 @@ export async function createCall(input: CallInput, opts: CreateCallOptions): Pro
     Object.assign(rec, handoff);
     await store.update(rec.id, handoff);
   }
-  if (needsCrmSync(rec)) Object.assign(rec, await saveCrm(rec.id, await syncToHubSpot(rec)));
   return rec;
-}
-
-/** Persists the CRM result. If the CRM columns don't exist yet (migration not run), say so instead of failing the call. */
-async function saveCrm(id: string, crm: CrmResult): Promise<CrmResult> {
-  try {
-    await getStore().update(id, crm);
-    return crm;
-  } catch (e) {
-    return { ...crm, crm_detail: `${crm.crm_detail} (Status not saved: ${(e as Error).message}. Run supabase/migrations/002_hubspot.sql.)` };
-  }
-}
-
-/** Logs (or re-logs) an existing call to HubSpot. */
-export async function retryCrmSync(id: string): Promise<CallRecord> {
-  const rec = await getStore().get(id);
-  if (!rec) throw new Error("Call not found");
-  if (!needsCrmSync(rec)) throw new Error("Only qualified leads and human-review calls (not demo seed data) are logged to HubSpot.");
-  return { ...rec, ...(await saveCrm(id, await syncToHubSpot(rec))) };
 }
 
 /** Re-attempts the Telegram handoff for an existing record (e.g. after credentials are added). */

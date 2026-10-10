@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { HubSpotTestButton, ReseedButton, TelegramTestButton } from "@/components/actions";
+import { ReseedButton, TelegramTestButton } from "@/components/actions";
 import { Card } from "@/components/ui";
 import { formatInr } from "@/lib/metrics";
 import { APPROVED_PRICING_RESPONSE, POLICY_CONFLICTS, TIMELINES } from "@/lib/policy";
@@ -82,27 +82,6 @@ export default async function IntegrationsPage() {
           <p className="mt-2 text-xs text-muted">A handoff is only marked “Sent” when the Telegram API confirms delivery.</p>
           <div className="mt-4">
             <TelegramTestButton enabled={s.telegram.live} />
-          </div>
-        </Card>
-
-        <Card title="HubSpot CRM" action={<State live={s.hubspot.live}>{s.hubspot.live ? "Connected" : "Not connected"}</State>} className="lg:col-span-2">
-          <p className="text-sm text-ink-2">
-            {s.hubspot.detail} Contacts are matched on phone number when one is available. Simulated calls are marked as simulated in the note, and the 19 demo-seed records are never synced. A call shows
-            “Saved in HubSpot” only when HubSpot confirms it.
-          </p>
-          {!s.hubspot.live && (
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ink-2">
-              <li>In HubSpot (free CRM): Settings → Integrations → <strong>Private Apps</strong> → Create a private app.</li>
-              <li>
-                Scopes: <code className="break-all rounded bg-surface-2 px-1">crm.objects.contacts.read</code> and <code className="break-all rounded bg-surface-2 px-1">crm.objects.contacts.write</code>.
-              </li>
-              <li>
-                Copy the access token into <code className="break-all rounded bg-surface-2 px-1">HUBSPOT_ACCESS_TOKEN</code> (Vercel env vars + .env.local) and redeploy.
-              </li>
-            </ol>
-          )}
-          <div className="mt-4">
-            <HubSpotTestButton enabled={s.hubspot.live} />
           </div>
         </Card>
 

@@ -79,16 +79,6 @@ Existing records can be re-sent from their detail page (**Retry Telegram handoff
 
 **Why Telegram over email:** designers are on their phones on site. A Telegram group gives instant push, is shared by the whole team (no lead sits in one person's inbox), the bot is free, and setup takes 5 minutes. Email suits a formal record, but it's slower to notice, which defeats the "answered within the hour converts 4×" insight.
 
-### HubSpot (CRM logging)
-Every qualified lead and human-review call (Vaani or simulated, never the demo seed) becomes a HubSpot **contact** with a **note**: outcome, criteria, escalation reason, summary and call notes. Contacts are de-duplicated on phone number when one is available. Simulated calls say so in the note. A call shows "Saved in HubSpot" only when HubSpot confirms it.
-
-1. In Supabase SQL Editor, run `supabase/migrations/002_hubspot.sql` (adds the CRM status columns).
-2. In HubSpot (free CRM): **Settings → Integrations → Private Apps** (newer accounts: **Development → Legacy apps**) → create an app with scopes `crm.objects.contacts.read` and `crm.objects.contacts.write`.
-3. Set `HUBSPOT_ACCESS_TOKEN` in Vercel (and `.env.local`), redeploy, then use **Integrations → Test HubSpot connection** (read-only).
-4. Existing calls can be logged from their record page (**Sync to HubSpot**).
-
-Cal.com booking was considered and deliberately left out of scope.
-
 ### Vaani Voice (live calls)
 Vaani ([docs](https://docs.vaanivoice.ai/guides/webhook-setup)) posts webhooks for every call lifecycle event. Only `call_postprocessing` is recorded, because it carries the summary, transcript, `entities` and `dispositions`. All other events get a 200 and are ignored.
 

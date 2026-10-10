@@ -85,9 +85,6 @@ export interface QualificationResult {
   handoff_note: string | null;
 }
 
-/** `synced` only when HubSpot confirmed the contact and note. Demo-seed records are never synced. */
-export type CrmStatus = "not_required" | "synced" | "failed" | "not_configured";
-
 export interface CallRecord extends CallInput, QualificationResult {
   id: string;
   created_at: string;
@@ -104,8 +101,4 @@ export interface CallRecord extends CallInput, QualificationResult {
   handoff_detail: string | null;
   handoff_message: string | null;
   handoff_at: string | null;
-  /** Optional so records created before the HubSpot columns existed still type-check. */
-  crm_status?: CrmStatus;
-  crm_detail?: string | null;
-  crm_contact_id?: string | null;
 }
