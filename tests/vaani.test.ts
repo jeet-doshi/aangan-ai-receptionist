@@ -82,3 +82,45 @@ test("complaint disposition or summary from Vaani escalates", () => {
   });
   assert.equal(qualify(input).escalation_required, true);
 });
+
+// Fixture: the first live Vaani call (10 Oct 2026), exactly as received; only name was extracted.
+const LIVE_CALL = {
+  event: "call_postprocessing",
+  call_id: "webrtc-1791643617-11ae3bc2",
+  data: {
+    call_id: "webrtc-1791643617-11ae3bc2",
+    summary:
+      "The caller, Priya, reached out to discuss an interior redesign project for her 3 BHK property in Banner. While she confirmed she is the owner and provided a target completion date of March 2027, the call ended before she could provide her contact details or the carpet area. The intake remains incomplete and requires follow-up to gather the missing information.",
+    entities: { name: "Priya" },
+    dispositions: { status: "Intake Incomplete" },
+    transcript:
+      "[14:47:10] AGENT: Thank you for calling Aangan Studio! I am your AI receptionist, May I know your name and what kind of interior design project you are planning?\n[14:47:28] USER: Hi. I am Priya. I have three BHK in Banner, and wonderful interior redesign. With executions. No rush. Maybe by March, and I'm the owner\n[14:47:30] AGENT: To help us get everything set up for you, could you please share your best contact number and your approximate carpet area in square feet?",
+  },
+};
+
+test("live Vaani call: missing fields are inferred from summary/transcript and the lead qualifies", () => {
+  const { input } = normaliseVaaniPayload(LIVE_CALL);
+  assert.equal(input.caller_name, "Priya");
+  assert.equal(input.location, "Baner");
+  assert.equal(input.project_type, "residential_full");
+  assert.equal(input.timeline_kind, "flexible");
+  assert.equal(input.decision_maker, "yes");
+  assert.equal(input.pricing_asked, false);
+  assert.equal(input.duration_sec, 20);
+  assert.ok(input.notes?.includes("Inferred from the Vaani summary/transcript (verify)"));
+  assert.equal(qualify(input).outcome, "qualified");
+});
+
+test("inference never overrides fields Vaani extracted, and ignores agent lines", () => {
+  const { input } = normaliseVaaniPayload({
+    event: "call_postprocessing",
+    data: {
+      summary: "Caller wants a restaurant in Nashik.",
+      entities: { location: "Banner", project_type: "office", timeline: "flexible" },
+      transcript: "[10:00:00] AGENT: We serve Pune and can discuss pricing.\n[10:00:05] USER: ok",
+    },
+  });
+  assert.equal(input.location, "Baner"); // alias-corrected, not replaced by "Nashik"
+  assert.equal(input.project_type, "commercial_office");
+  assert.equal(input.pricing_asked, false); // "pricing" appears only in an AGENT line
+});

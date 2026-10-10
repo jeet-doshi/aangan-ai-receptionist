@@ -3,6 +3,7 @@
 // it looks for our own field names first, then common alternatives, at the top level
 // or nested under data / extracted_data / collected_data / analysis / variables.
 import { createHmac, timingSafeEqual } from "crypto";
+import { OUTSIDE_AREA, SERVICE_AREA } from "./policy";
 import type { CallInput, DecisionMaker, ProjectType, TimelineKind } from "./types";
 
 type Json = Record<string, unknown>;
@@ -95,7 +96,7 @@ export function normaliseVaaniPayload(body: Json): NormalisedVaaniCall {
   const voiceCost = numOrNull(pick(f, "voice_cost_inr", "call_cost", "cost_inr", "cost"));
   const aiCost = numOrNull(pick(f, "ai_cost_inr", "llm_cost"));
   const transcriptRaw = pick(f, "transcript", "transcription", "conversation");
-  return {
+  const normalised: NormalisedVaaniCall = {
     input: {
       caller_name: str(pick(f, "caller_name", "name", "customer_name")),
       caller_phone: str(pick(f, "caller_phone", "phone", "phone_number", "contact_number", "from", "from_number", "caller_number", "customer_number")),
@@ -115,6 +116,135 @@ export function normaliseVaaniPayload(body: Json): NormalisedVaaniCall {
     reportedCosts: voiceCost != null || aiCost != null ? { voice_cost_inr: voiceCost, ai_cost_inr: aiCost } : null,
     externalId: str(pick(f, "call_id", "id", "conversation_id")),
   };
+  return inferFromConversation(normalised, str(pick(f, "summary", "call_summary")) ?? "");
+}
+
+// ---------------------------------------------------------------------------
+// Fallback inference from Vaani's summary + the caller's own words
+// ---------------------------------------------------------------------------
+
+const MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+
+/** Speech-to-text variants seen in live calls, mapped to the real locality. */
+const LOCATION_ALIASES: Record<string, string> = { banner: "Baner" };
+
+function titleCase(s: string) {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export function inferLocation(text: string): string | null {
+  const t = ` ${text.toLowerCase()} `;
+  for (const [alias, real] of Object.entries(LOCATION_ALIASES)) if (new RegExp(`\\b${alias}\\b`).test(t)) return real;
+  const outside = OUTSIDE_AREA.find((a) => new RegExp(`\\b${a}\\b`).test(t));
+  if (outside) return titleCase(outside);
+  // Specific localities first; the generic "pune"/"pcmc" only as a last resort.
+  const specific = SERVICE_AREA.filter((a) => a !== "pune" && a !== "pcmc").find((a) => new RegExp(`\\b${a}\\b`).test(t));
+  if (specific) return titleCase(specific);
+  return /\bpcmc\b/.test(t) ? "PCMC" : /\bpune\b/.test(t) ? "Pune" : null;
+}
+
+export function inferProjectType(text: string): ProjectType {
+  const t = text.toLowerCase().replace(/aangan studio/g, "");
+  if (/\brestaurant|\bcaf[eé]\b/.test(t)) return "restaurant";
+  if (/\bhotel\b/.test(t)) return "hotel";
+  if (/\b(retail|shop|showroom)\b/.test(t)) return "retail";
+  if (/\b(gym|fitness)\b/.test(t)) return "gym";
+  if (/\bvastu\b/.test(t) && /\bonly\b/.test(t)) return "vastu_only";
+  if (/\b(just|only) (some )?(ideas|advice|suggestions)\b|\badvice only\b/.test(t)) return "advice_only";
+  if (/\bclinic\b/.test(t)) return "commercial_clinic";
+  if (/\b(office|workspace|coworking)\b/.test(t)) return "commercial_office";
+  if (/\b\d\s*-?\s*bhk\b|\b(full|whole|entire|complete) (home|flat|house|apartment)\b|\bvilla\b|\bbungalow\b/.test(t)) return "residential_full";
+  if (/\b(kitchen|bedroom|living room|wardrobe)s?\b/.test(t)) return "residential_partial";
+  return "unknown";
+}
+
+export function inferTimeline(text: string, now: Date): Pick<CallInput, "timeline_kind" | "deadline_weeks" | "timeline_text"> | null {
+  const t = text.toLowerCase();
+  if (/\b(no rush|no hurry|not in a hurry|flexible|whenever)\b/.test(t)) return { timeline_kind: "flexible", deadline_weeks: null, timeline_text: "Flexible (inferred)" };
+  const m = t.match(new RegExp(`\\b(${MONTHS.join("|")}|${MONTHS.map((x) => x.slice(0, 3)).join("|")})\\b\\.?\\s*(\\d{4})?`));
+  if (m) {
+    const month = MONTHS.findIndex((x) => x.startsWith(m[1].slice(0, 3)));
+    let year = m[2] ? Number(m[2]) : now.getFullYear();
+    if (!m[2] && month < now.getMonth()) year += 1;
+    const endOfMonth = new Date(year, month + 1, 0);
+    const weeks = Math.floor((endOfMonth.getTime() - now.getTime()) / (7 * 86_400_000));
+    if (weeks >= 0) return { timeline_kind: "deadline", deadline_weeks: weeks, timeline_text: `By ${titleCase(MONTHS[month])} ${year} (inferred)` };
+  }
+  const w = t.match(/\b(?:in|within)\s+(\d+)\s*(weeks?|months?)\b/);
+  if (w) {
+    const n = Number(w[1]) * (w[2].startsWith("month") ? 4 : 1);
+    return { timeline_kind: "deadline", deadline_weeks: n, timeline_text: `Within ${w[1]} ${w[2]} (inferred)` };
+  }
+  return null;
+}
+
+/** Call length from the first and last [HH:MM:SS] timestamps in a Vaani transcript. */
+export function durationFromTranscript(transcript: string | null): number | null {
+  const stamps = [...(transcript ?? "").matchAll(/\[(\d{1,2}):(\d{2}):(\d{2})\]/g)].map((m) => Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]));
+  if (stamps.length < 2) return null;
+  let d = stamps[stamps.length - 1] - stamps[0];
+  if (d < 0) d += 86_400;
+  return d > 0 ? d : null;
+}
+
+/**
+ * Fills fields Vaani did not extract, using its summary plus the caller's own lines (never the agent's,
+ * which mention things like "Pune" or pricing on their own). Every inferred field is listed in the notes
+ * so a designer knows to double-check it.
+ */
+export function inferFromConversation(call: NormalisedVaaniCall, summary: string, now = new Date()): NormalisedVaaniCall {
+  const userLines = [...(call.transcript ?? "").matchAll(/USER:\s*([^\n]*)/g)].map((m) => m[1]).join(" ");
+  const text = `${summary} ${userLines}`;
+  const i = { ...call.input };
+  const inferred: string[] = [];
+
+  if (i.location) {
+    // Correct speech-to-text variants in an extracted location too (e.g. "Banner" -> "Baner").
+    const alias = Object.entries(LOCATION_ALIASES).find(([a]) => new RegExp(`\\b${a}\\b`, "i").test(i.location ?? ""));
+    if (alias) i.location = alias[1];
+  } else {
+    const loc = inferLocation(text);
+    if (loc) {
+      i.location = loc;
+      inferred.push("location");
+    }
+  }
+  if (i.project_type === "unknown" || i.project_type === "other") {
+    const pt = inferProjectType(text);
+    if (pt !== "unknown") {
+      i.project_type = pt;
+      inferred.push("project type");
+    }
+  }
+  if (i.timeline_kind === "unknown") {
+    const tl = inferTimeline(text, now);
+    if (tl) {
+      Object.assign(i, tl);
+      inferred.push("timeline");
+    }
+  }
+  if (i.decision_maker === "unknown") {
+    if (/\b(is|am|i'm|as) the (owner|decision[- ]maker)\b|\bconfirmed (she|he|they) (is|are) the owner\b|\bi own\b/i.test(text)) i.decision_maker = "yes";
+    else if (/\bauthori[sz]ed\b|\bon behalf of\b/i.test(text)) i.decision_maker = "authorised_representative";
+    if (i.decision_maker !== "unknown") inferred.push("decision-maker");
+  }
+  if (!i.area_sqft) {
+    const a = text.match(/(\d[\d,]*)\s*(sq\.?\s*f(?:ee)?t|square f(?:ee|oo)t|sqft)/i);
+    if (a) {
+      i.area_sqft = Number(a[1].replace(/,/g, ""));
+      inferred.push("carpet area");
+    }
+  }
+  if (!i.pricing_asked && /\b(price|pricing|cost|rate|charges?|how much)\b/i.test(userLines)) {
+    i.pricing_asked = true;
+    inferred.push("pricing question");
+  }
+  if (!i.duration_sec) {
+    const d = durationFromTranscript(call.transcript);
+    if (d) i.duration_sec = d;
+  }
+  if (inferred.length) i.notes = [i.notes, `Inferred from the Vaani summary/transcript (verify): ${inferred.join(", ")}.`].filter(Boolean).join("\n");
+  return { ...call, input: i };
 }
 
 /**
