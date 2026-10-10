@@ -4,173 +4,99 @@
 <meta charset="utf-8">
 <title>Components Map: Aangan AI Receptionist</title>
 <style>
-  :root {
-    --ink: #1a1714; --ink-2: #57524c; --muted: #8a847c; --line: #e4ded5; --page: #faf8f4; --card: #ffffff;
-    --brand: #8a4b2a; --brand-soft: #f6ece5; --blue: #2a78d6; --blue-soft: #eaf2fc;
-    --green: #127a3e; --green-soft: #e8f5ed; --red: #b42323; --red-soft: #fbeaea; --amber-soft: #fff4d6; --amber: #6b4a00;
-  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { width: 1800px; background: var(--page); color: var(--ink); font-family: "Segoe UI", system-ui, sans-serif; padding: 44px 48px 40px; }
-  header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 26px; }
-  h1 { font-size: 34px; letter-spacing: -0.5px; }
-  h1 span { color: var(--brand); }
-  .sub { color: var(--ink-2); font-size: 16px; margin-top: 6px; }
-  .meta { text-align: right; color: var(--muted); font-size: 13px; line-height: 1.6; }
-  .meta b { color: var(--ink-2); font-weight: 600; }
-
-  .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 34px; position: relative; }
-  .stage { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 16px; position: relative; display: flex; flex-direction: column; }
-  .stage:not(:last-child)::after {
-    content: ""; position: absolute; right: -27px; top: 34px; width: 0; height: 0;
-    border-top: 11px solid transparent; border-bottom: 11px solid transparent; border-left: 16px solid var(--brand);
-  }
-  .step { font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: var(--brand); text-transform: uppercase; }
-  .stage h2 { font-size: 22px; margin: 2px 0 2px; }
-  .q { font-size: 13px; color: var(--muted); font-style: italic; margin-bottom: 14px; min-height: 34px; }
-  .box { border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 13.5px; line-height: 1.45; }
-  .box b { display: block; font-size: 14px; margin-bottom: 3px; }
-  .box ul { padding-left: 16px; color: var(--ink-2); }
-  .box li { margin: 1px 0; }
-  .plain { background: #f4f1ec; }
-  .live { background: var(--green-soft); }
-  .live b { color: var(--green); }
-  .demo { background: var(--amber-soft); }
-  .demo b { color: var(--amber); }
-  .ai { background: var(--blue-soft); }
-  .ai b { color: var(--blue); }
-  .rules { background: var(--brand-soft); }
-  .rules b { color: var(--brand); }
-  .urgent { background: var(--red-soft); }
-  .urgent b { color: var(--red); }
-  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .6px; padding: 1px 6px; border-radius: 99px; margin-left: 4px; vertical-align: 1px; }
-  .t-live { background: var(--green); color: #fff; }
-  .t-demo { background: #e9b949; color: #3a2a00; }
-  .t-free { background: var(--brand); color: #fff; }
-
-  .bottom { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; gap: 18px; margin-top: 26px; }
-  .panel { border-radius: 14px; padding: 16px 18px; font-size: 13.5px; line-height: 1.5; border: 1px solid var(--line); background: var(--card); }
-  .panel h3 { font-size: 15px; margin-bottom: 6px; }
-  .panel ul { padding-left: 16px; color: var(--ink-2); }
-  .cut { border: 2px solid var(--red); background: var(--red-soft); }
-  .cut h3 { color: var(--red); }
-  .flag { border: 2px dashed #c9a227; background: var(--amber-soft); }
-  .flag h3 { color: var(--amber); }
-  footer { margin-top: 18px; display: flex; justify-content: space-between; color: var(--muted); font-size: 12.5px; }
-  .legend span { margin-left: 14px; }
-  .sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+  body { width: 1600px; background: #fff; color: #1d1d1b; font-family: Arial, "Helvetica Neue", "Segoe UI", sans-serif; }
+  .bar { background: #1d1d1b; color: #fff; text-align: center; padding: 26px 0 24px; font-size: 30px; font-weight: 700; letter-spacing: 3px; }
+  .bar small { display: block; font-size: 15px; font-weight: 400; letter-spacing: 1px; color: #bdbdb8; margin-top: 6px; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  col.label { width: 254px; }
+  th { height: 104px; font-size: 22px; letter-spacing: 2px; font-weight: 700; position: relative; border-left: 1px solid #d9d9d6; border-bottom: 1.5px solid #bdbdb8; vertical-align: middle; padding-bottom: 14px; }
+  th:first-child { border-left: none; }
+  th:not(:first-child)::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 19px; height: 19px; margin-left: -9.5px; border-radius: 50%; background: #1f9e78; }
+  td { border: 1px solid #d9d9d6; vertical-align: top; padding: 22px 16px 18px; font-size: 15px; line-height: 1.42; color: #3b3b38; }
+  tr td:first-child { border-left: none; vertical-align: middle; text-align: center; padding: 18px 12px; }
+  tr td:last-child { border-right: none; }
+  .who { font-size: 21px; font-weight: 700; color: #1d1d1b; line-height: 1.25; }
+  .role { font-size: 18px; color: #6f6f6b; margin-top: 4px; }
+  .none { color: #b9b9b5; text-align: center; vertical-align: middle; font-size: 20px; }
+  td b { color: #1d1d1b; }
+  .live { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .5px; background: #1f9e78; color: #fff; border-radius: 99px; padding: 1px 7px; margin-left: 4px; vertical-align: 2px; }
+  .red { color: #b42323; font-weight: 700; }
+  .green { color: #157a52; font-weight: 700; }
+  .notes { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1.5px solid #bdbdb8; }
+  .notes div { padding: 16px 20px 18px; font-size: 14.5px; line-height: 1.45; color: #3b3b38; border-left: 1px solid #d9d9d6; }
+  .notes div:first-child { border-left: none; }
+  .notes h4 { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; color: #1d1d1b; }
+  .notes .cut h4 { color: #b42323; }
+  .notes .flag h4 { color: #8a6400; }
+  .foot { background: #f4f4f2; font-size: 13px; color: #6f6f6b; padding: 10px 20px; display: flex; justify-content: space-between; }
 </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Components Map: <span>Aangan Studio AI Receptionist</span></h1>
-      <p class="sub">Every phone enquiry answered within minutes, day or night; qualified against Nikhil's rubric; the worthwhile ones reach a designer with everything already asked.</p>
-    </div>
-    <div class="meta"><b>Mesa School of Business · Case 03</b><br>Jeet Doshi · Oct 2026<br>Live: aangan-ai-receptionist-ten.vercel.app</div>
-  </header>
+  <div class="bar">CASE 03 — AANGAN STUDIO AI RECEPTIONIST<small>Every phone enquiry answered in minutes, day or night · Jeet Doshi · Mesa School of Business</small></div>
+  <table>
+    <colgroup><col class="label"><col><col><col><col><col></colgroup>
+    <tr><th></th><th>TRIGGER</th><th>INPUT</th><th>CONTEXT</th><th>PROCESSING</th><th>OUTPUT</th></tr>
 
-  <section class="flow">
-    <!-- 1 TRIGGER -->
-    <div class="stage">
-      <div class="step">1 · Trigger</div>
-      <h2>A call comes in</h2>
-      <p class="q">What starts the workflow?</p>
-      <div class="box live"><b>Inbound enquiry call <span class="tag t-live">LIVE</span></b>
-        <ul><li>Answered by the Vaani Voice AI agent, 24×7, including the ~33% that arrive outside 10am–7pm</li><li>Tested via Vaani web call (no phone number bought)</li></ul></div>
-      <div class="box demo"><b>Simulated call <span class="tag t-demo">DEMO</span></b>
-        <ul><li>In-app form with one-click scenarios</li><li>Always labelled; never shown as a real call</li></ul></div>
-      <div class="box plain"><b>Scope</b>
-        <ul><li>Phone channel only</li><li>WhatsApp + web form: same pipeline later</li></ul></div>
-    </div>
+    <tr>
+      <td><div class="who">CALLER</div><div class="role">(New enquiry or<br>existing client)</div></td>
+      <td>Calls the studio, <b>any hour</b>. About 1 in 3 calls arrive outside 10am–7pm, when no one answers today.</td>
+      <td>Says name, project type, size, site location, timeline; budget <i>only if they volunteer it</i>; may ask the price; or <b>complains</b> about an ongoing project.</td>
+      <td>Knows what they want, but not whether it fits the studio's scope, area or timelines.</td>
+      <td>Answers <b>one direct follow-up question</b> if project, location or timeline is unclear.</td>
+      <td>Hears the right reply: <b>next step to a consultation</b>, an honest graceful decline, or an urgent acknowledgement. <b>Never a price.</b></td>
+    </tr>
 
-    <!-- 2 INPUT -->
-    <div class="stage">
-      <div class="step">2 · Input</div>
-      <h2>What we capture</h2>
-      <p class="q">What data does the system receive?</p>
-      <div class="box plain"><b>From the caller</b>
-        <ul><li>Name, phone, new vs existing client</li><li>Project type + carpet area</li><li>Site location</li><li>Timeline / deadline</li><li>Budget, only if volunteered</li><li>Decision-maker status</li><li>Pricing question? Complaint / urgency?</li></ul></div>
-      <div class="box live"><b>Vaani webhook <span class="tag t-live">LIVE</span></b>
-        <ul><li>call_postprocessing event: summary, transcript, extracted entities, dispositions, duration</li><li>Secret-authenticated</li></ul></div>
-    </div>
+    <tr>
+      <td><div class="who">NIKHIL &amp;<br>DESIGN TEAM</div><div class="role">(Founder + 14 designers)</div></td>
+      <td class="none">—</td>
+      <td class="none">—</td>
+      <td>Nikhil's rules, written down: <b>qualified.md</b> (5 criteria), <b>services.md</b> (scope, Pune/PCMC, timelines), <b>pricing.md</b> (no numbers).</td>
+      <td>Humans decide only what the system flags: senior person takes <span class="red">escalations</span>; designer confirms <b>timeline-conflict</b> leads.</td>
+      <td>Designer calls back <b>with full context, no re-asking</b>. Nikhil sees calls, funnel and cost per lead on the dashboard instead of counting by hand.</td>
+    </tr>
 
-    <!-- 3 CONTEXT -->
-    <div class="stage">
-      <div class="step">3 · Context</div>
-      <h2>What it knows</h2>
-      <p class="q">What rules and knowledge guide it?</p>
-      <div class="box rules"><b>qualified.md</b>
-        <ul><li>Nikhil's 5 criteria: real project, Pune/PCMC, realistic timeline, budget band, decision-maker</li></ul></div>
-      <div class="box rules"><b>services.md</b>
-        <ul><li>Residential + offices/clinics/studios ≤ ~3,000 sq ft</li><li>Exclusions: structural, decor-only, furniture, restaurants, hotels, retail, gyms</li><li>Design 3–4 wk · execution 8–16 wk</li></ul></div>
-      <div class="box rules"><b>pricing.md</b>
-        <ul><li>One approved pricing line; no number, ever</li></ul></div>
-      <div class="box plain"><b>40 Sep enquiry transcripts</b>
-        <ul><li>20 phone calls → demo seed + test set</li></ul></div>
-    </div>
+    <tr>
+      <td><div class="who">AANGAN<br>RECEPTIONIST APP</div><div class="role">(Next.js on Vercel)</div></td>
+      <td>Vaani post-call webhook arrives <span class="live">LIVE</span>, or a <b>simulated call</b> from the demo form (always labelled).</td>
+      <td>Verifies the secret; keeps only the post-call event; normalises fields ("3 BHK" → full home, "Banner" → Baner, ms → s).</td>
+      <td>The studio rules coded in: service-area list, excluded project types, 3,000 sq ft limit, 6-week lead time, the approved pricing line.</td>
+      <td><b>① Escalation check first</b> → <b>② 5 criteria</b> pass / fail / unclear → <b>③</b> one question, decline, or qualify → <b>④ pricing guard</b> on every reply. Missing fields inferred from the summary and flagged "verify". Rules cost <b>₹0</b>.</td>
+      <td>Outcome: <span class="green">Qualified</span> · Needs follow-up · <span class="red">Human review</span> · Unqualified, with a handoff note and the caller's reply. <b>Dashboard</b>: KPIs, funnel, decline reasons, cost per call.</td>
+    </tr>
 
-    <!-- 4 PROCESSING -->
-    <div class="stage">
-      <div class="step">4 · Processing</div>
-      <h2>Prepare the data</h2>
-      <p class="q">How is raw input made usable?</p>
-      <div class="box plain"><b>Webhook handling</b>
-        <ul><li>Verify secret</li><li>Record only call_postprocessing; ignore the ~10 lifecycle events</li><li>Duration ms → s</li></ul></div>
-      <div class="box plain"><b>Normalise fields</b>
-        <ul><li>Free text → categories ("3 BHK" → full home)</li><li>Fix speech-to-text slips ("Banner" → Baner)</li></ul></div>
-      <div class="box plain"><b>Fill gaps from summary</b>
-        <ul><li>Location, timeline, owner, area inferred from the caller's own words</li><li>Every inferred field flagged "verify"</li></ul></div>
-    </div>
+    <tr>
+      <td><div class="who">VAANI VOICE</div><div class="role">(LLM voice agent)</div></td>
+      <td>Picks up <b>instantly, 24×7</b> <span class="live">LIVE</span></td>
+      <td>Caller's speech → text transcript.</td>
+      <td>Agent prompt: what the studio does, questions to ask, approved pricing line.</td>
+      <td>Holds the conversation; after the call, writes a <b>summary</b> and <b>extracts entities</b> (name, location, project…).</td>
+      <td>Sends <b>call_postprocessing</b> webhook: summary, transcript, entities, dispositions, duration.</td>
+    </tr>
 
-    <!-- 5 AI -->
-    <div class="stage">
-      <div class="step">5 · AI + decision</div>
-      <h2>Think &amp; decide</h2>
-      <p class="q">Where does judgement happen?</p>
-      <div class="box ai"><b>Vaani LLM voice agent</b>
-        <ul><li>Converses, asks one direct follow-up, summarises, extracts entities</li></ul></div>
-      <div class="box rules"><b>Rules engine <span class="tag t-free">₹0 / CALL</span></b>
-        <ul><li><b style="display:inline;font-size:13px">①</b> Escalation check first: existing-client complaint, unresponsive designer, urgent request</li><li><b style="display:inline;font-size:13px">②</b> 5 criteria: pass / fail / unclear</li><li><b style="display:inline;font-size:13px">③</b> Unclear 1–3 → one question; 1 fail → specific decline; 2+ → graceful decline</li><li><b style="display:inline;font-size:13px">④</b> Pricing guard on every reply</li></ul></div>
-    </div>
+    <tr>
+      <td><div class="who">SUPABASE</div><div class="role">(Database)</div></td>
+      <td>Every processed call.</td>
+      <td>Full call record: caller, project, criteria results, outcome, escalation, reply, costs, handoff status.</td>
+      <td>All past calls: 19 case-transcript replays (demo), simulated calls, live Vaani calls, each labelled.</td>
+      <td>Stores the record; updates handoff status once Telegram confirms.</td>
+      <td>Feeds the dashboard and its filters (date, source, outcome, escalations).</td>
+    </tr>
 
-    <!-- 6 OUTPUT -->
-    <div class="stage">
-      <div class="step">6 · Output</div>
-      <h2>Who gets what</h2>
-      <p class="q">What happens as a result?</p>
-      <div class="box plain"><b>Caller</b>
-        <ul><li>Approved reply, timelines explained, never a price</li></ul></div>
-      <div class="box live"><b>Designer: Telegram <span class="tag t-live">LIVE</span></b>
-        <ul><li>🟢 Qualified lead: full handoff note</li><li>Marked "sent" only when Telegram confirms</li></ul></div>
-      <div class="box urgent"><b>🔴 Urgent escalation</b>
-        <ul><li>Existing-client complaints → senior team instantly; never an "unqualified lead"</li></ul></div>
-      <div class="box live"><b>Nikhil: dashboard <span class="tag t-live">LIVE</span></b>
-        <ul><li>Supabase call records</li><li>Funnel, outcomes, decline reasons</li><li>Cost per call &amp; per qualified lead</li></ul></div>
-    </div>
-  </section>
-
-  <section class="bottom">
-    <div class="panel cut">
-      <h3>✂ The Cut: no price quoting</h3>
-      <p>Nikhil asked the system to "quote our standard per-square-foot pricing". pricing.md says no number may ever be quoted, so this was <b>deliberately not built</b>. Every reply passes a pricing guard; pricing questions get only the approved line, and are not disqualifying.</p>
-    </div>
-    <div class="panel flag">
-      <h3>⚑ Flagged for Nikhil: timeline rules conflict</h3>
-      <p>services.md: ≥ 6 weeks. qualified.md / T07: 8–10 weeks. Design + execution: ≥ 11 weeks. <b>&lt; 6 wk declined</b>; <b>6–10 wk sent to human review</b>, not silently decided.</p>
-    </div>
-    <div class="panel">
-      <h3>Why Telegram, not email</h3>
-      <ul><li>Designers are on site, on phones: instant push</li><li>One group chat: no lead stuck in one inbox</li><li>Free bot, 5-minute setup</li><li>Speed is the point: &lt; 1 hr reply converts 4×</li></ul>
-    </div>
-    <div class="panel">
-      <h3>Honesty guardrails</h3>
-      <ul><li>Demo / simulated / live calls always badged</li><li>"Sent" only on confirmed delivery</li><li>Costs labelled as estimates until real rates are set</li><li>Inferred fields marked for the designer to verify</li></ul>
-    </div>
-  </section>
-
-  <footer>
-    <div>Stack: Next.js + TypeScript on Vercel · Supabase · Telegram Bot API · Vaani Voice · github.com/jeet-doshi/aangan-ai-receptionist</div>
-    <div class="legend"><span><i class="sw" style="background:var(--green-soft);border:1px solid var(--green)"></i>Live &amp; tested</span><span><i class="sw" style="background:var(--amber-soft);border:1px solid #c9a227"></i>Demo</span><span><i class="sw" style="background:var(--brand-soft);border:1px solid var(--brand)"></i>Studio rules</span><span><i class="sw" style="background:var(--blue-soft);border:1px solid var(--blue)"></i>LLM</span></div>
-  </footer>
+    <tr>
+      <td><div class="who">TELEGRAM</div><div class="role">(Bot API)</div></td>
+      <td>Fires on a <span class="green">qualified lead</span> or an <span class="red">urgent escalation</span>.</td>
+      <td>Handoff note: caller, project, location, timeline, budget, decision-maker, criteria, reason.</td>
+      <td>Design team chat (chosen over email: instant, shared, free).</td>
+      <td>Delivers the message; Telegram API confirms delivery.</td>
+      <td>🟢 Qualified lead / 🔴 Urgent escalation on designers' phones. Marked <b>"sent" only when confirmed</b>.</td>
+    </tr>
+  </table>
+  <div class="notes">
+    <div class="cut"><h4>✂ The Cut</h4>Nikhil asked the system to <i>"quote our standard per-square-foot pricing"</i>. pricing.md says no number may ever be quoted, so it was <b>not built</b>. Pricing questions get only the approved line and don't disqualify.</div>
+    <div class="flag"><h4>⚑ Flagged for Nikhil</h4>Timeline rules conflict: services.md ≥ 6 weeks; qualified.md / T07 8–10 weeks; design + execution ≥ 11 weeks. <b>&lt; 6 wk declined, 6–10 wk sent to human review</b>, not silently decided.</div>
+    <div><h4>Honesty guardrails</h4>Demo, simulated and live calls are always badged. "Sent" only on confirmed delivery. Costs shown as estimates until real Vaani rates are set. Inferred fields marked for the designer to verify.</div>
+  </div>
+  <div class="foot"><span>Live: aangan-ai-receptionist-ten.vercel.app</span><span>Code: github.com/jeet-doshi/aangan-ai-receptionist</span></div>
 </body>
 </html>
