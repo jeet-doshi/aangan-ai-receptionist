@@ -136,6 +136,12 @@ export default async function CallDetail({ params }: { params: Promise<{ id: str
         )}
       </Card>
 
+      {c.notes && c.notes !== c.transcript && (
+        <Card title={c.source === "vaani" ? "Vaani call summary" : "Caller notes"}>
+          <p className="whitespace-pre-wrap text-sm text-ink-2">{c.notes}</p>
+        </Card>
+      )}
+
       {c.transcript && (
         <Card title={c.source === "demo_seed" ? "Transcript summary (from case data)" : "Notes / transcript"}>
           <p className="whitespace-pre-wrap text-sm text-ink-2">{c.transcript}</p>
