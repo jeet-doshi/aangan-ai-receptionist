@@ -45,6 +45,8 @@ export function buildHandoffMessage(rec: CallRecord): string {
     `Outcome: ${rec.outcome.replace(/_/g, " ")}`,
     rec.escalation_reason ? `Reason: ${rec.escalation_reason}` : null,
     rec.handoff_note ? `Note: ${rec.handoff_note}` : null,
+    // For simulated calls the notes are what the caller said; for Vaani calls, its summary + any inferred-field caveat.
+    rec.notes ? `\nCall notes:\n${rec.notes.length > 900 ? `${rec.notes.slice(0, 900)}…` : rec.notes}` : null,
     "",
     "Criteria:",
     ...rec.criteria.map((c) => `• ${c.label}: ${c.status.toUpperCase()}. ${c.reason}`),

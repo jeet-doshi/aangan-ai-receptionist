@@ -37,7 +37,12 @@ export const config = {
       return !process.env.VOICE_COST_PER_MIN_INR && !process.env.AI_COST_PER_CALL_INR;
     },
   },
-  appBaseUrl: process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""),
+  // Prefer the stable production domain: per-deployment URLs (VERCEL_URL) may sit behind Vercel's login wall.
+  appBaseUrl: (() => {
+    if (process.env.APP_BASE_URL) return process.env.APP_BASE_URL.replace(/\/$/, "");
+    const host = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+    return host ? `https://${host}` : "";
+  })(),
 };
 
 export function estimateCosts(durationSec: number | null | undefined) {
