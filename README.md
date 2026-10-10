@@ -1,6 +1,8 @@
 # Aangan Studio: AI Receptionist (MVP)
 
 MVP for **Mesa School of Business, Case 03 (Nikhil: Unanswered Enquiries)**.
+**Live demo:** https://aangan-ai-receptionist-ten.vercel.app
+
 Every phone enquiry is answered, qualified against Nikhil's own rubric (`qualified.md`), and routed. Qualified leads and urgent escalations go to the team with a complete handoff note. A dashboard shows what the system generates and what it costs.
 
 > **What's real and what's demo.** Every record has a source badge.
