@@ -55,3 +55,9 @@ create index if not exists calls_created_at_idx on public.calls (created_at desc
 create index if not exists calls_outcome_idx on public.calls (outcome);
 
 alter table public.calls enable row level security;
+
+-- HubSpot CRM sync (also in migrations/002_hubspot.sql for existing databases)
+alter table public.calls add column if not exists crm_status text not null default 'not_required'
+  check (crm_status in ('not_required', 'synced', 'failed', 'not_configured'));
+alter table public.calls add column if not exists crm_detail text;
+alter table public.calls add column if not exists crm_contact_id text;

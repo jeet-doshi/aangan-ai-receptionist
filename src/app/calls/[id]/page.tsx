@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RetryHandoffButton } from "@/components/actions";
+import { RetryHandoffButton, SyncCrmButton } from "@/components/actions";
 import { formatWhen } from "@/components/calls-table";
 import { Card, EscalationBadge, HandoffBadge, OutcomeBadge, SourceBadge } from "@/components/ui";
 import { formatDuration, formatInr } from "@/lib/metrics";
 import { PROJECT_TYPE_LABELS } from "@/lib/policy";
+import { getPortalId, hubspotEnabled, needsCrmSync } from "@/lib/hubspot";
 import { getStore } from "@/lib/store";
 import type { CriterionStatus } from "@/lib/types";
 
@@ -27,6 +28,16 @@ export default async function CallDetail({ params }: { params: Promise<{ id: str
   const c = await getStore().get(id);
   if (!c) notFound();
   const needsHandoff = c.outcome === "qualified" || c.outcome === "needs_human_review";
+  const crmStatus = c.crm_status ?? "not_required";
+  let crmLink: string | null = null;
+  if (c.crm_contact_id && hubspotEnabled()) {
+    try {
+      crmLink = `https://app.hubspot.com/contacts/${await getPortalId()}/record/0-1/${c.crm_contact_id}`;
+    } catch {
+      // link is a convenience; the sync status below is still accurate
+    }
+  }
+  const CRM_LABEL = { synced: "✓ Saved in HubSpot", failed: "✕ Sync failed", not_configured: "Not connected", not_required: "Not synced" } as const;
 
   const fields: [string, string][] = [
     ["Caller", c.caller_name || "Not given"],
@@ -132,6 +143,22 @@ export default async function CallDetail({ params }: { params: Promise<{ id: str
             </p>
             {c.handoff_message && <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-lg bg-surface-2 p-3 text-xs">{c.handoff_message}</pre>}
             {c.handoff_status !== "sent" && <RetryHandoffButton id={c.id} />}
+          </div>
+        )}
+      </Card>
+
+      <Card title="CRM (HubSpot)" action={<span className={`text-xs font-medium ${crmStatus === "synced" ? "text-good" : crmStatus === "failed" ? "text-critical" : "text-muted"}`}>{CRM_LABEL[crmStatus]}</span>}>
+        {!needsCrmSync(c) ? (
+          <p className="text-sm text-ink-2">{c.source === "demo_seed" ? "Demo seed data is never logged to the CRM." : "Only qualified leads and human-review calls are logged to HubSpot."}</p>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-ink-2">{c.crm_detail ?? "Not logged to HubSpot yet."}</p>
+            {crmLink && (
+              <a href={crmLink} target="_blank" rel="noreferrer" className="inline-block text-sm font-medium text-brand hover:underline">
+                Open contact in HubSpot →
+              </a>
+            )}
+            {crmStatus !== "synced" && hubspotEnabled() && <SyncCrmButton id={c.id} />}
           </div>
         )}
       </Card>

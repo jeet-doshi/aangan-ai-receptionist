@@ -36,6 +36,7 @@ export function computeMetrics(calls: CallRecord[]) {
   const newEnquiries = calls.filter((c) => c.caller_type === "new_enquiry" && !c.escalation_required);
   const notDeclined = newEnquiries.filter((c) => c.outcome !== "unqualified");
   const handedOff = calls.filter((c) => c.outcome === "qualified" && c.handoff_status === "sent").length;
+  const crmLogged = calls.filter((c) => c.outcome === "qualified" && c.crm_status === "synced").length;
   const handoffPrepared = calls.filter((c) => c.outcome === "qualified" && c.handoff_status !== "not_required").length;
 
   const durations = calls.map((c) => c.duration_sec ?? 0).filter((d) => d > 0);
@@ -82,6 +83,7 @@ export function computeMetrics(calls: CallRecord[]) {
       { label: "In scope", value: notDeclined.length, hint: "Not declined: qualified, pending follow-up, or flagged for review" },
       { label: "Qualified", value: qualified, hint: "Passed all five criteria" },
       { label: "Handoff delivered", value: handedOff, hint: `Confirmed by Telegram. ${handoffPrepared - handedOff} prepared but not delivered.` },
+      { label: "Logged in HubSpot", value: crmLogged, hint: "Qualified leads saved as HubSpot contacts (confirmed by HubSpot). Demo seed data is never synced." },
     ],
     durations: {
       totalSec: sum(durations),

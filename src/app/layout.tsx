@@ -38,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Pill live={s.storage.kind === "supabase"} label={s.storage.kind === "supabase" ? "Supabase" : "Local demo storage"} title={s.storage.detail} />
               <Pill live={s.telegram.live} label={s.telegram.label} title={s.telegram.detail} />
               <Pill live={s.vaani.live} label={s.vaani.label} title={s.vaani.detail} />
+              <Pill live={s.hubspot.live} label={s.hubspot.label} title={s.hubspot.detail} />
             </div>
           </div>
         </header>
