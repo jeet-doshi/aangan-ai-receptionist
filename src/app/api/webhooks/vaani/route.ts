@@ -16,6 +16,7 @@ export async function POST(req: Request) {
   if (!verifyVaaniRequest(config.vaani.webhookSecret, raw, req.headers, new URL(req.url))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!raw.trim()) return NextResponse.json({ ok: true, ignored: "empty body (connectivity check)" });
   let body: Record<string, unknown>;
   try {
     body = JSON.parse(raw);
@@ -31,6 +32,10 @@ export async function POST(req: Request) {
   }
   const isTest = body.test === true || /test/i.test(event);
   const call = normaliseVaaniPayload(body);
+  // A ping or connectivity test carries no conversation; acknowledge it without creating a call record.
+  const i = call.input;
+  const hasCallContent = Boolean(call.transcript || i.notes || i.caller_name || i.location || i.project_type !== "unknown" || i.duration_sec);
+  if (!hasCallContent) return NextResponse.json({ ok: true, ignored: "no call data (connectivity check)" });
   try {
     const rec = await createCall(call.input, {
       source: isTest ? "simulated" : "vaani",
@@ -41,4 +46,9 @@ export async function POST(req: Request) {
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
+}
+
+/** Some dashboards check connectivity with GET; respond without exposing anything. */
+export function GET() {
+  return NextResponse.json({ ok: true, service: "aangan-vaani-webhook" });
 }
