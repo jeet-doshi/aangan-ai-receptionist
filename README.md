@@ -94,6 +94,8 @@ Costs come from provider-reported figures when the webhook sends them. Otherwise
 2. Add the environment variables from `.env.example` in Vercel → Settings → Environment Variables (at minimum Supabase, for persistence).
 3. Deploy. Set `APP_BASE_URL` to the deployment URL so Telegram notes link to the record.
 
+**Access:** by default the deployed dashboard is open to anyone with the URL. To require a password, set `DASHBOARD_PASSWORD` (any username works). The Vaani webhook is never behind the password; it uses its own secret.
+
 ## Extending to WhatsApp and the web form (out of scope here)
 Both channels can call the same `createCall()` service: a WhatsApp Business webhook and a form POST handler map their fields into `CallInput` and reuse the same rules, handoff and dashboard. Add a `channel` column to compare channels.
 
